@@ -122,7 +122,8 @@ if st.button('Launch qualification 🎉'):
         # Display a Table with the API result
         df = get_dataframe_data()
         df.drop(columns='Text_clean', inplace=True)
-        st.table(df.head(10))
+        df['url'] = df['url'].apply(lambda x: '<a href="{0}" target="_blank">{0}</a>'.format(x))
+        st.write(df.to_html(escape=False, index=False), unsafe_allow_html=True)
 
         # Display dataviz
         movies_model_data = load_R_model('data/categories.json')
