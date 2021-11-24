@@ -3,4 +3,3 @@ pyLDAvis
 numpy
 requests
 pandas
-PIL
