@@ -1,17 +1,16 @@
-# from enum import auto
 import streamlit as st
-# import altair as alt
 from PIL import Image
 import pandas as pd
-# import numpy as np
 import requests
 import re
 import time
+import json
+import pyLDAvis
 
 CSS = """
-etr89bj1 {
-    width:150px!important;
-    }
+.reportview-container .main .block-container{
+        max-width: 1226px;
+}
 
 .stApp {
     background-image: url(https://images.prismic.io/ankor/7a8e937c-b781-40d2-b06e-4e4dacec4475_OMY_BANNIERE.jpg);
@@ -31,8 +30,15 @@ h2 {
 .block-container {
     background-color:#ffffff;
     padding: 1rem 1rem!important;
+    margin:1rem 10rem!important;
 }
+
 """
+
+st.set_page_config(
+            page_title="Commercial 2.0",
+            page_icon="🤖",
+            layout="centered")
 
 st.write(f'<style>{CSS}</style>', unsafe_allow_html=True)
 
@@ -65,8 +71,20 @@ def regex_url(urls_list):
 def get_dataframe_data():
     return pd.read_csv('data/small_cleaned_data.csv', sep=";")
 
+def load_R_model(filename):
+    with open(filename, 'r') as j:
+        data_input = json.load(j)
+    data = {
+        'topic_term_dists': data_input['ratio_cat_words'], #phi
+        'doc_topic_dists': data_input['ratio_url_cat'], #theta
+        'doc_lengths': data_input['doc_length'], #doc.length
+        'vocab': data_input['vocab'], #vocab
+        'term_frequency': data_input['vocab_frequency'] #term.frequency
+    }
+    return data
+
 urls = st.text_area("Insert one or more url(s) separated by commas:",
-                    "www.lewagon.com, (...)")
+                    "www.lewagon.com, www.google.fr")
 urls_list = urls.split(",")
 st.write("Number of url(s):", len(urls_list))
 
@@ -100,46 +118,15 @@ if st.button('Launch qualification 🎉'):
         if len(urls_list) == 1:
             # Display a graph if there is only one URL
             pass
-            # df = get_dataframe_data()
-            # st.table(df.head())
-            # c = alt.Chart(df).mark_circle().encode(x='a',
-            #                                        y='b',
-            #                                        size='c',
-            #                                        color='c',
-            #                                        tooltip=['a', 'b',
-            #                                                 'c']).properties(
-            #                                                     width=700,
-            #                                                     height=500)
-            # st.write(c)
 
         # Display a Table with the API result
         df = get_dataframe_data()
         df.drop(columns='Text_clean', inplace=True)
         st.table(df.head(10))
 
-import json
-import numpy as np
-
-
-def load_R_model(filename):
-    with open(filename, 'r') as j:
-        data_input = json.load(j)
-    data = {
-        'topic_term_dists': data_input['phi'],
-        'doc_topic_dists': data_input['theta'],
-        'doc_lengths': data_input['doc.length'],
-        'vocab': data_input['vocab'],
-        'term_frequency': data_input['term.frequency']
-    }
-    return data
-
-
-movies_model_data = load_R_model('data/movie_reviews_input.json')
-
-import pyLDAvis
-
-movies_vis_data = pyLDAvis.prepare(**movies_model_data)
-
-html_string = pyLDAvis.prepared_data_to_html(movies_vis_data)
-from streamlit import components
-components.v1.html(html_string, width=1300, height=900, scrolling=True)
+        # Display dataviz
+        movies_model_data = load_R_model('data/categories.json')
+        movies_vis_data = pyLDAvis.prepare(**movies_model_data)
+        html_string = pyLDAvis.prepared_data_to_html(movies_vis_data)
+        from streamlit import components
+        components.v1.html(html_string, width=1210, height=780, scrolling=False)
