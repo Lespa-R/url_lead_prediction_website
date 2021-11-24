@@ -1,1 +1,6 @@
 streamlit
+pyLDAvis
+numpy
+requests
+pandas
+PIL
