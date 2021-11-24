@@ -11,6 +11,6 @@
 
   "doc_length":[310,180,220],
 
-  "vocab":["Baby","stick","cream","makers","memories"],
+  "words":["Baby","stick","cream","makers","memories"],
 
-  "vocab_frequency":[34,26,28,12,6]}
+  "words_frequency":[34,26,28,12,6]}

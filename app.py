@@ -57,6 +57,7 @@ logo2 = columns[1].image(ankorstore, use_column_width=False)
 '''
 
 def regex_url(urls_list):
+    """Regex for url matching, take an urls list and return number of wrong urls"""
     r = re.compile(
     '((http|https)\:\/\/)?[a-zA-Z0-9\.\/\?\:@\-_=#]+\.([a-zA-Z]){2,6}([a-zA-Z0-9\.\&\/\?\:@\-_=#])*'
     )
@@ -69,17 +70,19 @@ def regex_url(urls_list):
 
 
 def get_dataframe_data():
+    """Load file small_cleaned_data.csv for testing"""
     return pd.read_csv('data/small_cleaned_data.csv', sep=";")
 
 def load_R_model(filename):
+    """Load json file for testing will be provide by API in the futur"""
     with open(filename, 'r') as j:
         data_input = json.load(j)
     data = {
         'topic_term_dists': data_input['ratio_cat_words'], #phi
         'doc_topic_dists': data_input['ratio_url_cat'], #theta
         'doc_lengths': data_input['doc_length'], #doc.length
-        'vocab': data_input['vocab'], #vocab
-        'term_frequency': data_input['vocab_frequency'] #term.frequency
+        'vocab': data_input['words'], #vocab
+        'term_frequency': data_input['words_frequency'] #term.frequency
     }
     return data
 
