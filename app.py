@@ -80,7 +80,7 @@ def load_R_model(filename):
     data = {
         'topic_term_dists': data_input['ratio_cat_words'], #phi
         'doc_topic_dists': data_input['ratio_url_cat'], #theta
-        'doc_lengths': data_input['doc_length'], #doc.length
+        'doc_lengths': data_input['doc_length_url'], #doc.length
         'vocab': data_input['words'], #vocab
         'term_frequency': data_input['words_frequency'] #term.frequency
     }
@@ -109,11 +109,20 @@ if st.button('Launch qualification 🎉'):
 
         try:
             # Call API to get prediction
-            param = {'urls': urls}
-            url = 'https://api-gwwhhqf6zq-uc.a.run.app/'
+            param = {'urls': f'{urls_list}'}
+            url = 'http://127.0.0.1:8000/get_data'
             prediction = requests.get(url, params=param)
-            st.write(prediction.json())
             st.success('This is a success!')
+
+            data = json.loads(prediction.json())
+            df = pd.json_normalize(data)
+            df.drop(columns='Text', inplace=True)
+            df['url'] = df['url'].apply(lambda x: '<a href="{0}" target="_blank">{0}</a>'.format(x))
+            df['Email'] = df['Email'].apply(lambda x: ['<a href=mailto:"{0}">{0}</a>'.format(i) for i in x] if x != 'No email' else x)
+            df['Facebook'] = df['Facebook'].apply(lambda x: ['<a href="{0}" target="_blank">{0}</a>'.format(i) for i in x] if x != 'No Facebook' else x)
+            df['Instagram'] = df['Instagram'].apply(lambda x: ['<a href="{0}" target="_blank">{0}</a>'.format(i) for i in x] if x != 'No Instagram' else x)
+            st.write(df.to_html(escape=False, index=False), unsafe_allow_html=True)
+
         except:
             # Error happen when calling API
             st.error('Something goes wrong ! Try another url')
@@ -121,12 +130,6 @@ if st.button('Launch qualification 🎉'):
         if len(urls_list) == 1:
             # Display a graph if there is only one URL
             pass
-
-        # Display a Table with the API result
-        df = get_dataframe_data()
-        df.drop(columns='Text_clean', inplace=True)
-        df['url'] = df['url'].apply(lambda x: '<a href="{0}" target="_blank">{0}</a>'.format(x))
-        st.write(df.to_html(escape=False, index=False), unsafe_allow_html=True)
 
         # Display dataviz
         movies_model_data = load_R_model('data/categories.json')
