@@ -87,7 +87,7 @@ def load_R_model(filename):
     return data
 
 urls = st.text_area("Insert one or more url(s) separated by commas:",
-                    "www.lewagon.com, www.google.fr")
+                    "https://www.evaliaparis.com/, https://www.yves-rocher.fr/, https://www.uneheurepoursoi.com/, https://www.calzedonia.com/, https://newjerseyparis.com/, https://www.indies.fr/, https://bylouise.fr/, https://www.placedestendances.com/, https://www.kidsaround.com/, https://www.catimini.com/, https://www.melijoe.com/fr, https://www.sergent-major.com/")
 urls_list = urls.split(",")
 st.write("Number of url(s):", len(urls_list))
 
