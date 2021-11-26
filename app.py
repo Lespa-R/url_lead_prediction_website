@@ -7,10 +7,13 @@ import time
 import json
 import pyLDAvis
 
+
+
 CSS = """
 .reportview-container .main .block-container{
         max-width: 1226px;
 }
+
 
 .stApp {
     background-image: url(https://images.prismic.io/ankor/7a8e937c-b781-40d2-b06e-4e4dacec4475_OMY_BANNIERE.jpg);
@@ -27,6 +30,10 @@ h2 {
     padding:0;
 }
 
+.table {
+    --bs-table-striped-bg:rgb(240, 242, 246)!important;
+}
+
 .block-container {
     background-color:#ffffff;
     padding: 1rem 1rem!important;
@@ -41,7 +48,9 @@ st.set_page_config(
             layout="centered")
 
 st.write(f'<style>{CSS}</style>', unsafe_allow_html=True)
-
+st.write("""<!-- CSS Bootstrap only -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+""", unsafe_allow_html=True)
 
 lewagon = Image.open('images/lewagon.png')
 ankorstore = Image.open('images/ankorstore.png')
@@ -110,18 +119,18 @@ if st.button('Launch qualification 🎉'):
         try:
             # Call API to get prediction
             param = {'urls': f'{urls_list}'}
-            url = 'http://127.0.0.1:8000/get_data'
+            url = 'https://ton-service-n75dafaksa-ew.a.run.app/get_data'
             prediction = requests.get(url, params=param)
             st.success('This is a success!')
 
             data = json.loads(prediction.json())
             df = pd.json_normalize(data)
-            df.drop(columns='Text', inplace=True)
+            df.drop(columns=['Text', 'Language'], inplace=True)
             df['url'] = df['url'].apply(lambda x: '<a href="{0}" target="_blank">{0}</a>'.format(x))
-            df['Email'] = df['Email'].apply(lambda x: ['<a href=mailto:"{0}">{0}</a>'.format(i) for i in x] if x != 'No email' else x)
-            df['Facebook'] = df['Facebook'].apply(lambda x: ['<a href="{0}" target="_blank">{0}</a>'.format(i) for i in x] if x != 'No Facebook' else x)
-            df['Instagram'] = df['Instagram'].apply(lambda x: ['<a href="{0}" target="_blank">{0}</a>'.format(i) for i in x] if x != 'No Instagram' else x)
-            st.write(df.to_html(escape=False, index=False), unsafe_allow_html=True)
+            df['Email'] = df['Email'].apply(lambda x: ", ".join(['<a href=mailto:"{0}">email</a>'.format(i) for i in x]) if x != 'No email' else '')
+            df['Facebook'] = df['Facebook'].apply(lambda x: ", ".join(['<a href="{0}" target="_blank">FbLink</a>'.format(i) for i in x]) if x != 'No Facebook' else '')
+            df['Instagram'] = df['Instagram'].apply(lambda x: ", ".join([f'<a href="{url}" target="_blank">InstaLink{i}</a>' for i, url in enumerate(x,1)]) if x != 'No Instagram' else '')
+            st.write(df.to_html(escape=False, index=False, classes=["table", "table-striped"]), unsafe_allow_html=True)
 
         except:
             # Error happen when calling API
@@ -130,6 +139,8 @@ if st.button('Launch qualification 🎉'):
         if len(urls_list) == 1:
             # Display a graph if there is only one URL
             pass
+
+        st.markdown('# Explain our model')
 
         # Display dataviz
         movies_model_data = load_R_model('data/categories.json')
