@@ -138,6 +138,7 @@ if st.button('Launch qualification 🎉'):
             # Call API to get prediction
             param = {'urls': f'{urls_list}'}
             url = 'https://api-n75dafaksa-ew.a.run.app/get_data'
+            # url = 'http://127.0.0.1:8000/get_data'
             prediction = requests.get(url, params=param)
             st.success('This is a success!')
 
