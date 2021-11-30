@@ -1,6 +1,8 @@
+from streamlit import components
 import streamlit as st
 from PIL import Image
 import pandas as pd
+import numpy as np
 import requests
 import re
 import time
@@ -38,6 +40,11 @@ h2 {
     background-color:#ffffff;
     padding: 1rem 1rem!important;
     margin:1rem 10rem!important;
+}
+
+.streamlit-expanderContent {
+    padding-left:0!important;
+    padding-right:0!important;
 }
 
 """
@@ -95,6 +102,17 @@ def load_R_model(filename):
     }
     return data
 
+def highlight_score(data, color='yellow'):
+    '''
+    highlight the maximum in a Series or DataFrame
+    '''
+    st.write(data)
+    # attr = "<p style='background-color: {}'".format(color)
+    # data = data.apply(lambda x: x if isinstance(x, float) else 0)
+    # if data.ndim == 1:
+    #     is_max = data == data.max()
+    #     return [attr if v else '</p>' for v in is_max]
+
 urls = st.text_area("Insert one or more url(s) separated by commas:",
                     "https://www.evaliaparis.com/, https://www.yves-rocher.fr/, https://www.uneheurepoursoi.com/, https://www.calzedonia.com/, https://newjerseyparis.com/, https://www.indies.fr/, https://bylouise.fr/, https://www.placedestendances.com/, https://www.kidsaround.com/, https://www.catimini.com/, https://www.melijoe.com/fr, https://www.sergent-major.com/")
 urls_list = urls.split(",")
@@ -114,7 +132,7 @@ if st.button('Launch qualification 🎉'):
             # Update the progress bar with each iteration.
             bar.progress(i + 1)
             latest_iteration.text(f'{i+1}%')
-            time.sleep(0.001)
+            time.sleep(0.01)
 
         try:
             # Call API to get prediction
@@ -127,14 +145,17 @@ if st.button('Launch qualification 🎉'):
             df = pd.json_normalize(data)
             df.drop(columns=['Text', 'Language'], inplace=True)
             df['url'] = df['url'].apply(lambda x: '<a href="{0}" target="_blank">{0}</a>'.format(x))
-            df['Email'] = df['Email'].apply(lambda x: ", ".join(['<a href=mailto:"{0}">email</a>'.format(i) for i in x]) if x != 'No email' else '')
-            df['Facebook'] = df['Facebook'].apply(lambda x: ", ".join(['<a href="{0}" target="_blank">FbLink</a>'.format(i) for i in x]) if x != 'No Facebook' else '')
-            df['Instagram'] = df['Instagram'].apply(lambda x: ", ".join([f'<a href="{url}" target="_blank">InstaLink{i}</a>' for i, url in enumerate(x,1)]) if x != 'No Instagram' else '')
-            st.write(df.to_html(escape=False, index=False, classes=["table", "table-striped"]), unsafe_allow_html=True)
+            df['Email'] = df['Email'].apply(lambda x: '' if (x == 'No email' or x == 'NaN') else ", ".join(['<a href=mailto:"{0}">email</a>'.format(i) for i in x]))
+            df['Facebook'] = df['Facebook'].apply(lambda x: '' if (x == 'No Facebook' or x == 'NaN')  else ", ".join(['<a href="{0}" target="_blank">FbLink</a>'.format(i) for i in x]))
+            df['Instagram'] = df['Instagram'].apply(lambda x: '' if (x == 'No Instagram' or x == 'NaN')  else ", ".join([f'<a href="{url}" target="_blank">InstaLink{i}</a>' for i, url in enumerate(x,1)]))
+            df.fillna('', inplace=True)
 
+            # df = df.apply(highlight_score, axis=1)
+
+            st.write(df.to_html(escape=False, index=False, classes=["table", "table-striped"]), unsafe_allow_html=True)
         except:
             # Error happen when calling API
-            st.error('Something goes wrong ! Try another url')
+            st.error('Something went wrong ! Try another url')
 
         if len(urls_list) == 1:
             # Display a graph if there is only one URL
@@ -142,9 +163,16 @@ if st.button('Launch qualification 🎉'):
 
         st.markdown('# Explain our model')
 
-        # Display dataviz
-        movies_model_data = load_R_model('data/categories.json')
-        movies_vis_data = pyLDAvis.prepare(**movies_model_data)
-        html_string = pyLDAvis.prepared_data_to_html(movies_vis_data)
-        from streamlit import components
-        components.v1.html(html_string, width=1210, height=780, scrolling=False)
+        with st.expander("French model dataviz"):
+            # @st.cache
+            model_data_fr = load_R_model('data/dataviz_fr.json')
+            vis_data_fr = pyLDAvis.prepare(**model_data_fr)
+            html_string_fr = pyLDAvis.prepared_data_to_html(vis_data_fr)
+            components.v1.html(html_string_fr, width=1210, height=780, scrolling=False)
+
+        with st.expander("English model dataviz"):
+            # @st.cache
+            model_data_en = load_R_model('data/dataviz_en.json')
+            vis_data_en = pyLDAvis.prepare(**model_data_en)
+            html_string_en = pyLDAvis.prepared_data_to_html(vis_data_en)
+            components.v1.html(html_string_en, width=1210, height=780, scrolling=False)
