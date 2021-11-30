@@ -47,6 +47,14 @@ h2 {
     padding-right:0!important;
 }
 
+a {
+    text-decoration:none!important;
+}
+
+a:hover {
+    text-decoration:underline!important;
+}
+
 """
 
 st.set_page_config(
@@ -102,16 +110,19 @@ def load_R_model(filename):
     }
     return data
 
-def highlight_score(data, color='yellow'):
+def highlight_score(serie, color='#09ab3b33'):
     '''
     highlight the maximum in a Series or DataFrame
     '''
-    st.write(data)
-    # attr = "<p style='background-color: {}'".format(color)
-    # data = data.apply(lambda x: x if isinstance(x, float) else 0)
-    # if data.ndim == 1:
-    #     is_max = data == data.max()
-    #     return [attr if v else '</p>' for v in is_max]
+    attr = "<p style='background-color: {}'>".format(color)
+
+    is_max = serie == serie[["Beauty", "Fashion", "Grocery", "Home & Living", "Kids"]].max()
+
+    for i in range(len(serie)):
+        if is_max.iloc[i]==True:
+            serie.iloc[i] = f'{attr}{serie.iloc[i]}%</p>'
+
+    return serie
 
 urls = st.text_area("Insert one or more url(s) separated by commas:",
                     "https://www.evaliaparis.com/, https://www.yves-rocher.fr/, https://www.uneheurepoursoi.com/, https://www.calzedonia.com/, https://newjerseyparis.com/, https://www.indies.fr/, https://bylouise.fr/, https://www.placedestendances.com/, https://www.kidsaround.com/, https://www.catimini.com/, https://www.melijoe.com/fr, https://www.sergent-major.com/")
@@ -149,9 +160,9 @@ if st.button('Launch qualification 🎉'):
             df['Email'] = df['Email'].apply(lambda x: '' if (x == 'No email' or x == 'NaN') else ", ".join(['<a href=mailto:"{0}">email</a>'.format(i) for i in x]))
             df['Facebook'] = df['Facebook'].apply(lambda x: '' if (x == 'No Facebook' or x == 'NaN')  else ", ".join(['<a href="{0}" target="_blank">FbLink</a>'.format(i) for i in x]))
             df['Instagram'] = df['Instagram'].apply(lambda x: '' if (x == 'No Instagram' or x == 'NaN')  else ", ".join([f'<a href="{url}" target="_blank">InstaLink{i}</a>' for i, url in enumerate(x,1)]))
-            df.fillna('', inplace=True)
 
-            # df = df.apply(highlight_score, axis=1)
+            df = df.apply(highlight_score, axis=1)
+            df.fillna('', inplace=True)
 
             st.write(df.to_html(escape=False, index=False, classes=["table", "table-striped"]), unsafe_allow_html=True)
         except:
