@@ -18,7 +18,7 @@ CSS = """
 
 
 .stApp {
-    background-image: url(https://images.prismic.io/ankor/7a8e937c-b781-40d2-b06e-4e4dacec4475_OMY_BANNIERE.jpg);
+    background-image: url(https://fr.ankorstore.com/images/stripes-background.svg);
     background-size: cover;
     font-family: system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji;
 }
@@ -37,9 +37,11 @@ h2 {
 }
 
 .block-container {
-    background-color:#ffffff;
+    background-color: #ffffff;
     padding: 1rem 1rem!important;
-    margin:1rem 10rem!important;
+    margin: 1rem 10rem!important;
+    box-shadow: 0 0 20px #0000001f;
+    border-radius: 8px;
 }
 
 .streamlit-expanderContent {
