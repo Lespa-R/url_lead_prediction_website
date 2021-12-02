@@ -157,8 +157,8 @@ if st.button('Launch qualification 🎉'):
         latest_iteration = st.empty()
 
         # API URL local for testing / GCP in production
-        # url = 'https://api-n75dafaksa-ew.a.run.app/get_data'
-        url = 'http://127.0.0.1:8000/get_data'
+        url = 'https://api-n75dafaksa-ew.a.run.app/get_data'
+        # url = 'http://127.0.0.1:8000/get_data'
 
         try:
             # Call API first time to get prediction
