@@ -134,17 +134,19 @@ def highlight_score(serie, color='#09ab3b33'):
 
 # Textarea with urls
 urls = st.text_area("Insert one or more url(s) separated by commas:",
-                    "https://www.evaliaparis.com/, https://www.yves-rocher.fr/, https://www.uneheurepoursoi.com/, https://www.calzedonia.com/, https://newjerseyparis.com/, https://www.indies.fr/, https://bylouise.fr/, https://www.placedestendances.com/, https://www.kidsaround.com/, https://www.catimini.com/, https://www.melijoe.com/fr, https://www.sergent-major.com/")
-urls_list = urls.split(",")
-st.write("Number of url(s):", len(urls_list))
+                    "https://www.evaliaparis.com/, https://www.yves-rocher.fr/, https://www.uneheurepoursoi.com/, https://www.calzedonia.com/, https://newjerseyparis.com/, https://www.etsy.com/fr, https://bylouise.fr/, https://www.catimini.com/, http://placedesepices.com")
+if urls is not None:
+    urls_list = urls.split(",")
 
 # Upload a CSV
 st.set_option('deprecation.showfileUploaderEncoding', False)
 uploaded_file = st.file_uploader("Or choose a CSV file", type="csv")
 if uploaded_file is not None:
     data = pd.read_csv(uploaded_file)
-    st.write(data)
+    urls_list = data['url'].to_list()
+    st.write(urls_list)
 
+st.write("Number of url(s):", len(urls_list))
 
 if st.button('Launch qualification 🎉'):
     bad_urls = regex_url(urls_list)
@@ -185,9 +187,10 @@ if st.button('Launch qualification 🎉'):
                 latest_iteration.text(f'{progression}%')
 
             st.success('This is a success!')
-            df.drop(columns=['Text', 'Language'], inplace=True)
+            df.drop(columns=['Text', 'Email', 'Language'], inplace=True)
+            df_download = df.copy()
             df['url'] = df['url'].apply(lambda x: '<a href="{0}" target="_blank">{0}</a>'.format(x))
-            df['Email'] = df['Email'].apply(lambda x: '' if (x == 'No email' or x == 'NaN') else ", ".join(['<a href=mailto:"{0}">email</a>'.format(i) for i in x]))
+            # df['Email'] = df['Email'].apply(lambda x: '' if (x == 'No email' or x == 'NaN') else ", ".join(['<a href=mailto:"{0}">email</a>'.format(i) for i in x]))
             df['Facebook'] = df['Facebook'].apply(lambda x: '' if (x == 'No Facebook' or x == 'NaN')  else ", ".join(['<a href="{0}" target="_blank">FbLink</a>'.format(i) for i in x]))
             df['Instagram'] = df['Instagram'].apply(lambda x: '' if (x == 'No Instagram' or x == 'NaN')  else ", ".join([f'<a href="{url}" target="_blank">InstaLink{i}</a>' for i, url in enumerate(x,1)]))
 
@@ -195,6 +198,15 @@ if st.button('Launch qualification 🎉'):
             df.fillna('', inplace=True)
 
             st.write(df.to_html(escape=False, index=False, classes=["table", "table-striped"]), unsafe_allow_html=True)
+
+            # Download results as csv file
+            csv = df_download.to_csv().encode('utf-8')
+            st.download_button(
+                label="Download data as CSV",
+                data=csv,
+                file_name='qualified_brands.csv',
+                mime='text/csv',
+            )
         except:
             # Error happen when calling API
             st.error('Something went wrong ! Try another url')
@@ -219,21 +231,25 @@ with st.expander("English model dataviz"):
     html_string_en = pyLDAvis.prepared_data_to_html(vis_data_en)
     components.v1.html(html_string_en, width=1210, height=780, scrolling=False)
 
+# @st.cache
 st.markdown("""#### Made with ❤️ by""")
 col1, col2, col3 = st.columns(3)
 
+# @st.cache
 col1.write("""<div style='text-align: center;'>
             <a href='https://www.linkedin.com/in/arnaud-vuacheux/' target='_blank'>
                 <img src='https://media-exp1.licdn.com/dms/image/C4D03AQFKsogocxpUTA/profile-displayphoto-shrink_800_800/0/1634035549772?e=1643846400&v=beta&t=Gf-YYd1p3rkz8abPd59txkO2dmLMFQOS6jglDZhFTcg' style='width:120px;height:120px;border-radius:50%;margin-bottom: 25px;' />
                 <p>Arnaud Vuacheux</p>
             </a>
             </div>""", unsafe_allow_html = True)
+# @st.cache
 col2.write("""<div style='text-align: center;'>
             <a href='https://www.linkedin.com/in/emmanuel-miralles-a2604911a/' target='_blank'>
             <img src='https://media-exp1.licdn.com/dms/image/C4D03AQEpDVzZZTEwyQ/profile-displayphoto-shrink_800_800/0/1616948728275?e=1643846400&v=beta&t=st95nKH408-cpnsav0fbM0YWRHIEXphxxKxS0MowdEo' style='width:120px;height:120px;border-radius:50%;margin-bottom: 25px;' />
             <p>Emmanuel Miralles</p>
             </a>
             </div>""", unsafe_allow_html = True)
+# @st.cache
 col3.write("""<div style='text-align: center;'>
             <a href='https://www.linkedin.com/in/robinbusinessdevelopment/'target='_blank'>
             <img src='https://media-exp1.licdn.com/dms/image/C4E03AQH73LCrsyPnJA/profile-displayphoto-shrink_800_800/0/1636019621502?e=1643846400&v=beta&t=bSTvj5JS8yPRnjET9Y6ybHmS8TXQdLuAo_Tstn2G1lw' style='width:120px;height:120px;border-radius:50%;margin-bottom: 25px;' />
