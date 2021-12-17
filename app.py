@@ -85,7 +85,7 @@ logo2 = columns[1].image(ankorstore, use_column_width=False)
 
 '''
 # Commercial 2.0
-## Predictive qualification from a website
+## Predictive qualificationzzzz from a website
 '''
 
 def regex_url(urls_list):
@@ -148,7 +148,7 @@ if uploaded_file is not None:
 
 st.write("Number of url(s):", len(urls_list))
 
-if st.button('Launch qualification 🎉'):
+if st.button('Launch qualification    🎉'):
     bad_urls = regex_url(urls_list)
 
     if bad_urls != 0:
