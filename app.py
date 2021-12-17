@@ -85,7 +85,7 @@ logo2 = columns[1].image(ankorstore, use_column_width=False)
 
 '''
 # Lead predictions for Ankorstore
-## Predictive qualification based on website
+## Qualification based on URL
 '''
 
 def regex_url(urls_list):
