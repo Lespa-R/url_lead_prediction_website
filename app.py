@@ -65,7 +65,7 @@ a:hover {
 """
 
 st.set_page_config(
-            page_title="Commercial 2.0",
+            page_title="Lead predictions for Ankorstore",
             page_icon="🤖",
             layout="centered")
 
@@ -84,8 +84,8 @@ logo1 = columns[0].image(lewagon, use_column_width=False)
 logo2 = columns[1].image(ankorstore, use_column_width=False)
 
 '''
-# Commercial 2.0
-## Predictive qualificationzzzz from a website
+# Lead predictions for Ankorstore
+## Predictive qualification based on website
 '''
 
 def regex_url(urls_list):
